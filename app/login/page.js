@@ -74,7 +74,7 @@ export default function Login() {
                     
                     <div className="text-center pt-4 border-t border-gray-200">
                         <p className="text-gray-600">
-                            Don't have an account?{" "}
+                            Dont have an account?{" "}
                             <Link 
                                 href="/register" 
                                 className="text-indigo-600 hover:text-indigo-800 font-medium transition duration-200"
@@ -87,7 +87,7 @@ export default function Login() {
                 
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-sm text-blue-700 text-center">
-                        💡 Contact administrator if you don't have an account
+                        💡 Contact administrator if you dont have an account
                     </p>
                 </div>
             </div>

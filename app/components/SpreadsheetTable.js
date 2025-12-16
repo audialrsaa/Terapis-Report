@@ -39,39 +39,12 @@ const SpreadsheetTable = ({ data, onSave, onClear, onAddToReport }) => {
   };
 
   // Load data dari localStorage saat pertama kali komponen dimuat
-  useEffect(() => {
-    const savedTableData = localStorage.getItem("tableData");
-    if (savedTableData) {
-      try {
-        const parsedData = JSON.parse(savedTableData);
-        // Pastikan setiap data memiliki field komisi
-        const dataWithKomisi = parsedData.map(item => ({
-          ...item,
-          komisi: item.komisi || calculateKomisi(item.nominal)
-        }));
-        const sorted = [...dataWithKomisi].sort(
-          (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
-        );
-        setTableData(sorted);
-        onSave?.(sorted);
-      } catch (err) {
-        console.error("❌ Gagal parse tableData dari localStorage:", err);
-      }
-    }
-    setIsInitialized(true);
-  }, []);
-
-  // Simpan data ke localStorage setiap kali tableData berubah
-  useEffect(() => {
-    if (isInitialized && tableData.length > 0) {
-      localStorage.setItem("tableData", JSON.stringify(tableData));
-    }
-  }, [tableData, isInitialized]);
-
-  // Sync dengan data dari parent jika ada
-  useEffect(() => {
-    if (data && data.length > 0 && tableData.length === 0 && isInitialized) {
-      const dataWithKomisi = data.map(item => ({
+useEffect(() => {
+  const savedTableData = localStorage.getItem("tableData");
+  if (savedTableData) {
+    try {
+      const parsedData = JSON.parse(savedTableData);
+      const dataWithKomisi = parsedData.map(item => ({
         ...item,
         komisi: item.komisi || calculateKomisi(item.nominal)
       }));
@@ -79,9 +52,41 @@ const SpreadsheetTable = ({ data, onSave, onClear, onAddToReport }) => {
         (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
       );
       setTableData(sorted);
-      localStorage.setItem("tableData", JSON.stringify(sorted));
+      onSave?.(sorted);
+    } catch (err) {
+      console.error("❌ Gagal parse tableData dari localStorage:", err);
     }
-  }, [data, isInitialized]);
+  }
+  setIsInitialized(true);
+}, [onSave]); // ✅ FIX
+
+  // Simpan data ke localStorage setiap kali tableData berubah
+useEffect(() => {
+  if (!isInitialized) return;
+
+  localStorage.setItem("tableData", JSON.stringify(tableData));
+}, [tableData, isInitialized]); // ✅ AMAN
+;
+
+  // Sync dengan data dari parent jika ada
+useEffect(() => {
+  if (!isInitialized) return;
+  if (!data || data.length === 0) return;
+  if (tableData.length > 0) return;
+
+  const dataWithKomisi = data.map(item => ({
+    ...item,
+    komisi: item.komisi || calculateKomisi(item.nominal)
+  }));
+
+  const sorted = [...dataWithKomisi].sort(
+    (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
+  );
+
+  setTableData(sorted);
+  localStorage.setItem("tableData", JSON.stringify(sorted));
+}, [data, isInitialized, tableData.length]); // ✅ FIX
+
 
   const flatMenu = useMemo(() => buildFlatMenu(menuData), []);
 
